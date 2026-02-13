@@ -6,7 +6,7 @@ import type {
   KnowledgeBase,
   Stats,
   PaginatedResponse,
-  GroupRole,
+  Role,
 } from "./types";
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000/api/v1";
@@ -78,7 +78,7 @@ export const groups = {
   },
 
   findMine() {
-    return request<{ data: { id: string; name: string; emoji: string | null; role: GroupRole }[] }>(
+    return request<{ data: { id: string; name: string; emoji: string | null; role: Role }[] }>(
       "/groups/mine",
     );
   },
@@ -109,14 +109,14 @@ export const groups = {
     return request<{ data: GroupMember[] }>(`/groups/${groupId}/members`);
   },
 
-  addMember(groupId: string, data: { email: string; role?: GroupRole }) {
+  addMember(groupId: string, data: { email: string }) {
     return request<GroupMember>(`/groups/${groupId}/members`, {
       method: "POST",
       body: JSON.stringify(data),
     });
   },
 
-  updateMemberRole(groupId: string, userId: string, role: GroupRole) {
+  updateMemberRole(groupId: string, userId: string, role: Role) {
     return request<GroupMember>(`/groups/${groupId}/members/${userId}`, {
       method: "PUT",
       body: JSON.stringify({ role }),

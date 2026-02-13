@@ -1,7 +1,6 @@
 // ── Enums ──────────────────────────────────────────────
 
 export type Role = "ADMIN" | "USER";
-export type GroupRole = "ADMIN" | "USER";
 
 // ── Auth ───────────────────────────────────────────────
 
@@ -30,7 +29,7 @@ export interface UserGroup {
   id: string;
   name: string;
   emoji: string | null;
-  role: GroupRole;
+  role: Role;
 }
 
 // ── Users ──────────────────────────────────────────────
@@ -61,7 +60,7 @@ export interface GroupMember {
   name: string;
   email: string;
   avatarUrl: string | null;
-  role: GroupRole;
+  role: Role;
   joinedAt: string;
 }
 

@@ -7,7 +7,7 @@ import { useToast } from "@/components/toast";
 import { useAuth } from "@/lib/auth-context";
 import { groups as groupsApi, stats as statsApi } from "@/lib/api";
 import { ApiError } from "@/lib/api";
-import type { Group, GroupMember, Stats, GroupRole } from "@/lib/types";
+import type { Group, GroupMember, Stats, Role } from "@/lib/types";
 import { getInitials, getAvatarGradient, getGroupColor, formatRelativeTime } from "@/lib/utils";
 
 export default function GroupsPage() {
@@ -36,7 +36,6 @@ export default function GroupsPage() {
 
   // Form state — assign member
   const [memberEmail, setMemberEmail] = useState("");
-  const [memberRole, setMemberRole] = useState<GroupRole>("USER");
   const [submittingMember, setSubmittingMember] = useState(false);
 
   // Fetch groups
@@ -126,12 +125,10 @@ export default function GroupsPage() {
     try {
       await groupsApi.addMember(selectedGroupId, {
         email: memberEmail.trim(),
-        role: memberRole,
       });
       showToast("User assigned!");
       setShowMemberModal(false);
       setMemberEmail("");
-      setMemberRole("USER");
       fetchMembers(selectedGroupId);
     } catch (err) {
       showToast(err instanceof ApiError ? err.message : "Failed to assign member", "error");
@@ -142,7 +139,7 @@ export default function GroupsPage() {
 
   async function handleToggleRole(member: GroupMember) {
     if (!selectedGroupId) return;
-    const newRole: GroupRole = member.role === "ADMIN" ? "USER" : "ADMIN";
+    const newRole: Role = member.role === "ADMIN" ? "USER" : "ADMIN";
     try {
       await groupsApi.updateMemberRole(selectedGroupId, member.userId, newRole);
       setMembers((prev) =>
@@ -398,20 +395,7 @@ export default function GroupsPage() {
             className="w-full px-4 py-3 bg-bg-surface border border-border rounded-[10px] text-[0.9rem] text-text-primary outline-none focus:border-accent focus:shadow-[0_0_0_3px_var(--color-accent-glow)] transition-all placeholder:text-text-muted"
           />
         </div>
-        <div className="mb-7">
-          <label className="block text-[0.82rem] font-medium text-text-secondary mb-2 uppercase tracking-[0.04em]">
-            Role
-          </label>
-          <select
-            value={memberRole}
-            onChange={(e) => setMemberRole(e.target.value as GroupRole)}
-            className="w-full px-4 py-3 bg-bg-surface border border-border rounded-[10px] text-[0.9rem] text-text-primary outline-none cursor-pointer appearance-none bg-[url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%238b8a9e%22%20stroke-width%3D%222%22%3E%3Cpath%20d%3D%22M6%209l6%206%206-6%22/%3E%3C/svg%3E')] bg-no-repeat bg-[right_14px_center] pr-10 focus:border-accent focus:shadow-[0_0_0_3px_var(--color-accent-glow)] transition-all"
-          >
-            <option value="USER">User</option>
-            <option value="ADMIN">Admin</option>
-          </select>
-        </div>
-        <div className="flex gap-2.5 justify-end">
+        <div className="flex gap-2.5 justify-end mt-7">
           <button
             onClick={() => setShowMemberModal(false)}
             className="px-5 py-2.5 rounded-[10px] text-[0.85rem] font-medium border border-border bg-bg-surface text-text-primary hover:bg-bg-surface-2 transition-all"
