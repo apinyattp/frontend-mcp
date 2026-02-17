@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
+import ReactMarkdown from "react-markdown";
 import { EditIcon, TrashIcon } from "@/components/icons";
 import { Modal } from "@/components/modal";
 import { useToast } from "@/components/toast";
@@ -102,6 +103,14 @@ export default function KnowledgeBaseViewPage() {
                 <span>{kb.group.emoji} {kb.group.name}</span>
                 <div className="w-[3px] h-[3px] rounded-full bg-text-muted" />
                 <span>Updated {formatRelativeTime(kb.updatedAt)}</span>
+                {kb.format && kb.format !== "text" && (
+                  <>
+                    <div className="w-[3px] h-[3px] rounded-full bg-text-muted" />
+                    <span className="px-2 py-0.5 rounded-[5px] bg-accent/10 text-accent text-[0.72rem] font-medium uppercase">
+                      {kb.format}
+                    </span>
+                  </>
+                )}
               </div>
             </div>
             <div className="flex gap-2">
@@ -123,8 +132,18 @@ export default function KnowledgeBaseViewPage() {
           </div>
 
           {/* Content */}
-          <div className="bg-bg-surface border border-border rounded-[14px] p-9 leading-[1.8] text-[0.92rem] text-text-secondary whitespace-pre-wrap">
-            {kb.content}
+          <div className="bg-bg-surface border border-border rounded-[14px] p-9 leading-[1.8] text-[0.92rem] text-text-secondary">
+            {kb.format === "markdown" ? (
+              <div className="prose prose-invert max-w-none prose-headings:text-text-primary prose-p:text-text-secondary prose-a:text-accent prose-strong:text-text-primary prose-code:text-accent prose-code:bg-bg-surface-2 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-pre:bg-bg-deep prose-pre:border prose-pre:border-border">
+                <ReactMarkdown>{kb.content}</ReactMarkdown>
+              </div>
+            ) : kb.format === "json" ? (
+              <pre className="overflow-x-auto text-[0.85rem] font-mono leading-[1.6]">
+                <code>{kb.content}</code>
+              </pre>
+            ) : (
+              <div className="whitespace-pre-wrap">{kb.content}</div>
+            )}
           </div>
         </div>
       </div>

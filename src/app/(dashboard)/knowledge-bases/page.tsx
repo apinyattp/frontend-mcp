@@ -151,9 +151,16 @@ export default function KnowledgeBasesPage() {
                   <span className="text-[0.76rem] text-text-secondary">{kb.owner.name}</span>
                 </div>
                 <div className="flex items-center justify-between pt-3.5 border-t border-border">
-                  <span className="text-[0.72rem] px-2.5 py-1 rounded-[6px] bg-bg-surface-2 text-text-secondary">
-                    {kb.group.emoji} {kb.group.name}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[0.72rem] px-2.5 py-1 rounded-[6px] bg-bg-surface-2 text-text-secondary">
+                      {kb.group.emoji} {kb.group.name}
+                    </span>
+                    {kb.format && kb.format !== "text" && (
+                      <span className="text-[0.68rem] px-2 py-0.5 rounded-[5px] bg-accent/10 text-accent font-medium uppercase">
+                        {kb.format}
+                      </span>
+                    )}
+                  </div>
                   <span className="text-[0.72rem] text-text-muted">
                     Updated {formatRelativeTime(kb.updatedAt)}
                   </span>

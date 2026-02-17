@@ -4,6 +4,7 @@ import type {
   Group,
   GroupMember,
   KnowledgeBase,
+  KbFormat,
   Stats,
   PaginatedResponse,
   Role,
@@ -154,7 +155,7 @@ export const knowledgeBases = {
     return request<KnowledgeBase>(`/knowledge-bases/${id}`);
   },
 
-  create(data: { title: string; groupId: string; content: string }) {
+  create(data: { title: string; groupId: string; content: string; format?: KbFormat }) {
     return request<KnowledgeBase>("/knowledge-bases", {
       method: "POST",
       body: JSON.stringify(data),
@@ -163,7 +164,7 @@ export const knowledgeBases = {
 
   update(
     id: string,
-    data: { title?: string; groupId?: string; content?: string },
+    data: { title?: string; groupId?: string; content?: string; format?: KbFormat },
   ) {
     return request<KnowledgeBase>(`/knowledge-bases/${id}`, {
       method: "PUT",

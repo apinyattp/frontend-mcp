@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { CheckIcon } from "@/components/icons";
 import { useToast } from "@/components/toast";
 import { useAuth } from "@/lib/auth-context";
 import { knowledgeBases as kbApi, groups as groupsApi, ApiError } from "@/lib/api";
+import type { KbFormat } from "@/lib/types";
 
 export default function KnowledgeBaseEditPage() {
   const router = useRouter();
@@ -15,10 +16,12 @@ export default function KnowledgeBaseEditPage() {
   const { user, userGroups } = useAuth();
   const isAdmin = user?.role === "ADMIN";
   const id = params.id as string;
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [title, setTitle] = useState("");
   const [groupId, setGroupId] = useState("");
   const [content, setContent] = useState("");
+  const [format, setFormat] = useState<KbFormat>("text");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [allGroups, setAllGroups] = useState<{ id: string; name: string; emoji: string | null }[]>([]);
@@ -30,6 +33,7 @@ export default function KnowledgeBaseEditPage() {
         setTitle(kb.title);
         setGroupId(kb.group.id);
         setContent(kb.content);
+        setFormat(kb.format ?? "text");
       })
       .catch((err) => {
         showToast(err instanceof ApiError ? err.message : "Failed to load", "error");
@@ -49,6 +53,21 @@ export default function KnowledgeBaseEditPage() {
 
   const selectGroups = isAdmin ? allGroups : userGroups;
 
+  function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      setContent(reader.result as string);
+      const ext = file.name.split(".").pop()?.toLowerCase();
+      if (ext === "md") setFormat("markdown");
+      else if (ext === "json") setFormat("json");
+      else setFormat("text");
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  }
+
   async function handleSave() {
     if (!title.trim() || !groupId || !content.trim()) return;
     setSubmitting(true);
@@ -57,6 +76,7 @@ export default function KnowledgeBaseEditPage() {
         title: title.trim(),
         groupId,
         content: content.trim(),
+        format,
       });
       showToast("Changes saved!");
       router.push(`/knowledge-bases/${id}`);
@@ -135,6 +155,42 @@ export default function KnowledgeBaseEditPage() {
             </select>
           </div>
 
+          <div className="mb-6 flex gap-4">
+            <div className="flex-1">
+              <label className="block text-[0.82rem] font-medium text-text-secondary mb-2 uppercase tracking-[0.04em]">
+                Format
+              </label>
+              <select
+                value={format}
+                onChange={(e) => setFormat(e.target.value as KbFormat)}
+                className="w-full px-4 py-3 bg-bg-surface border border-border rounded-[10px] text-[0.9rem] text-text-primary outline-none cursor-pointer appearance-none bg-[url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%238b8a9e%22%20stroke-width%3D%222%22%3E%3Cpath%20d%3D%22M6%209l6%206%206-6%22/%3E%3C/svg%3E')] bg-no-repeat bg-[right_14px_center] pr-10 focus:border-accent focus:shadow-[0_0_0_3px_var(--color-accent-glow)] transition-all"
+              >
+                <option value="text">Plain Text</option>
+                <option value="markdown">Markdown</option>
+                <option value="json">JSON</option>
+              </select>
+            </div>
+            <div className="flex-1">
+              <label className="block text-[0.82rem] font-medium text-text-secondary mb-2 uppercase tracking-[0.04em]">
+                Upload File
+              </label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".md,.json,.txt"
+                onChange={handleFileUpload}
+                className="hidden"
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full px-4 py-3 bg-bg-surface border border-border rounded-[10px] text-[0.9rem] text-text-secondary hover:bg-bg-surface-2 hover:border-border-hover transition-all text-left"
+              >
+                Replace with file...
+              </button>
+            </div>
+          </div>
+
           <div className="mb-6">
             <label className="block text-[0.82rem] font-medium text-text-secondary mb-2 uppercase tracking-[0.04em]">
               Content
@@ -142,7 +198,7 @@ export default function KnowledgeBaseEditPage() {
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              className="w-full px-4 py-3 bg-bg-surface border border-border rounded-[10px] text-[0.9rem] text-text-primary outline-none focus:border-accent focus:shadow-[0_0_0_3px_var(--color-accent-glow)] transition-all placeholder:text-text-muted min-h-[320px] resize-y leading-[1.7]"
+              className="w-full px-4 py-3 bg-bg-surface border border-border rounded-[10px] text-[0.9rem] text-text-primary outline-none focus:border-accent focus:shadow-[0_0_0_3px_var(--color-accent-glow)] transition-all placeholder:text-text-muted min-h-[320px] resize-y leading-[1.7] font-mono"
             />
           </div>
 

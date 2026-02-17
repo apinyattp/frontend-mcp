@@ -66,10 +66,13 @@ export interface GroupMember {
 
 // ── Knowledge Bases ────────────────────────────────────
 
+export type KbFormat = "text" | "markdown" | "json";
+
 export interface KnowledgeBase {
   id: string;
   title: string;
   content: string;
+  format: KbFormat;
   score?: number;
   owner: {
     id: string;
